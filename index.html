@@ -200,6 +200,20 @@ details[open] summary{margin-bottom:8px}
 #lockScreen{position:fixed;inset:0;z-index:100;background:linear-gradient(135deg,#312e81,#6d28d9);display:grid;place-items:center;padding:16px;transition:opacity .4s}
 #lockScreen.unlock{opacity:0}
 .lockbox{background:#fff;border-radius:18px;padding:28px 26px;width:100%;max-width:340px;text-align:center;box-shadow:0 20px 50px rgba(0,0,0,.3)}
+/* ---- AI Study Buddy ---- */
+.aip{background:#fff;border:1px solid var(--line);border-radius:16px;width:min(390px,calc(100vw - 28px));box-shadow:0 14px 40px rgba(20,30,60,.22);display:flex;flex-direction:column;overflow:hidden;animation:fadeUp .25s ease both}
+.aihead{display:flex;justify-content:space-between;align-items:center;padding:10px 12px;background:linear-gradient(120deg,#eef0ff,#f6edff);border-bottom:1px solid var(--line)}
+.aihead .btn{padding:4px 9px}
+.aimsgs{height:min(340px,calc(100vh - 330px));min-height:150px;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:8px;background:#fafbff}
+.aim{max-width:88%;padding:9px 12px;border-radius:14px;font-size:14.5px;line-height:1.5;animation:fadeUp .2s ease both;word-wrap:break-word}
+.aim.bot{background:#fff;border:1px solid var(--line);align-self:flex-start;border-bottom-left-radius:4px}
+.aim.me{background:var(--accent);color:#fff;align-self:flex-end;border-bottom-right-radius:4px}
+.aichips{display:flex;gap:6px;flex-wrap:wrap;padding:8px 10px 0}
+.aichips button{border:1px solid #d8d4fb;background:#f5f4ff;color:#3b2fb8;border-radius:16px;padding:5px 10px;font-size:12.5px;font-weight:700;cursor:pointer}
+.aiform{display:flex;gap:6px;padding:10px}
+.aiform textarea{flex:1;resize:none;font-size:14.5px;padding:8px 10px}
+.aiform .btn{padding:8px 14px}
+.aisetup{padding:14px;font-size:14.5px}
 .modal{position:fixed;inset:0;background:rgba(20,24,40,.45);display:grid;place-items:center;z-index:50;padding:16px}
 .mbox{background:#fff;border-radius:14px;padding:20px 22px;max-width:420px;width:100%;box-shadow:0 12px 40px rgba(0,0,0,.25);font-size:16px}
 .mbox p{margin:0 0 16px}
@@ -228,28 +242,27 @@ details[open] summary{margin-bottom:8px}
     <div class="pdots" id="pdots"></div>
     <div class="row" style="justify-content:center;gap:6px"><button class="btn primary" id="pStart">Start</button><button class="btn" id="pReset">Reset</button><button class="btn ghost" id="pSkip" title="Skip to the next session">⏭</button></div>
     <div class="psets small">Focus <input type="number" id="pF" min="1" max="120"> · Break <input type="number" id="pB" min="1" max="60"> · Long <input type="number" id="pL" min="1" max="60"> min</div>
-    <label class="small" style="display:flex;gap:6px;align-items:center;margin-top:6px"><input type="checkbox" id="pMute"> Pause the built-in music during breaks</label>
   </div>
-  <div class="sndp" id="sndp" hidden>
-    <div style="font-weight:800;margin-bottom:8px">🎵 Relaxing music</div>
-    <div class="sndopts">
-      <button data-s="piano">🎹 Calm piano</button>
-      <button data-s="lofi">☕ Lo-fi beats</button>
-      <button data-s="ambient">🌌 Ambient dream</button>
-      <button data-s="musicbox">🎶 Music box</button>
-      <button data-s="off" class="on">⏹ Off</button>
+  <div class="aip" id="aip" hidden>
+    <div class="aihead"><div><b>🤖 AI Study Buddy</b> <span class="small mute" id="aiMode"></span></div><div><button class="btn ghost" id="aiForget" title="Remove my API key from this browser" hidden>🔑✕</button><button class="btn ghost" id="aiClose" title="Close">✕</button></div></div>
+    <div id="aiChat" hidden>
+      <div class="aimsgs" id="aiMsgs"></div>
+      <div class="aichips" id="aiChips"></div>
+      <form id="aiForm" class="aiform"><textarea id="aiIn" rows="2" placeholder="Ask anything about the test…"></textarea><button class="btn primary" id="aiSend" type="submit">➤</button></form>
     </div>
-    <label class="small" style="display:flex;align-items:center;gap:8px;margin-top:10px">Volume <input type="range" id="sndVol" min="0" max="1" step="0.01" value="0.5" style="flex:1"></label>
-    <div class="ytbox">
-      <div style="font-weight:800;margin-bottom:6px">▶️ Your YouTube music</div>
-      <a id="ytLink" class="btn" href="https://www.youtube.com/watch?v=GjsCaJhPyUo" target="_blank" rel="noopener noreferrer" style="display:block;text-align:center;text-decoration:none">Open on YouTube ↗</a>
-      <div class="small mute" style="margin-top:6px">Opens in a new tab. Keep it playing there while you study here. (Turn the built-in music off first.)</div>
-      <details style="margin-top:6px;padding:6px 10px"><summary class="small">Change the link</summary><input id="ytIn" class="txt" style="padding:6px;font-size:13px;margin-top:6px" placeholder="Paste a YouTube link"><div class="small" id="ytMsg" style="margin-top:4px"></div></details>
+    <div id="aiSetup" class="aisetup" hidden>
+      <p style="margin-top:0">The Study Buddy uses <b>Claude Haiku 5.5</b>, Anthropic’s cheapest model: a whole evening of questions usually costs less than one cent.</p>
+      <p>To switch it on here, paste <b>your own</b> Anthropic API key. It is saved <b>only in this browser</b> and sent only to Anthropic.</p>
+      <p class="small">Get a key at <a href="https://console.anthropic.com/settings/keys" target="_blank" rel="noopener">console.anthropic.com/settings/keys</a> (console.anthropic.com → API keys).</p>
+      <input id="aiKey" class="txt" type="password" autocomplete="off" placeholder="sk-ant-..." style="font-size:14px">
+      <div id="aiKeyMsg" class="small" style="color:var(--bad);min-height:18px;margin-top:4px"></div>
+      <button class="btn primary" id="aiKeySave" style="width:100%">Save key and start</button>
+      <p class="small mute" style="margin-bottom:0">Tip: on the claude.ai version of this page the Study Buddy works without a key.</p>
     </div>
   </div>
   <div class="row" style="gap:10px">
     <button class="pombtn" id="pomBtn" title="Pomodoro timer" aria-label="Pomodoro timer">🍅<span id="pomMini"></span></button>
-    <button class="sndbtn" id="sndBtn" title="Relaxing music" aria-label="Relaxing music">🎵</button>
+    <button class="sndbtn" id="aiBtn" title="AI Study Buddy" aria-label="AI Study Buddy">🤖</button>
   </div>
 </div>
 
@@ -1635,7 +1648,7 @@ function viewHome(){
  <p class="mute">Everything from Lessons 1–10, built around the <b>Criterion A</b> rubric: describe (i), apply (ii) and analyse (iii). ${QS.length} hard questions with explanations, full notes, flashcards and a timed mock test.</p>
  <div class="statgrid" style="margin:14px 0"><div class="stat"><div class="v">${overall}%</div><div class="small mute">Overall mastery</div></div><div class="stat"><div class="v">${done}/${QS.length}</div><div class="small mute">Questions tried</div></div><div class="stat"><div class="v">${mistakeIds().length}</div><div class="small mute">Mistakes to fix</div></div></div>
  <div class="row"><button class="btn primary" onclick="go('learn')">📖 Start learning</button><button class="btn" onclick="startPractice(TOPICS.map(t=>t.id),20,'Mixed practice (20)')">⚡ Quick mixed 20</button><button class="btn" onclick="go('mock')">📝 Mock test (45 min)</button><button class="btn" onclick="go('ultimate')">🏆 Ultimate Test</button></div>
- <p class="small mute" style="margin:12px 0 0">✍️ ${QS.filter(q=>q.type==="written").length} written questions with an automatic answer corrector · 🍅 Pomodoro timer and 🎵 relaxing music: buttons at the bottom right.</p></div>
+ <p class="small mute" style="margin:12px 0 0">✍️ ${QS.filter(q=>q.type==="written").length} written questions with an automatic answer corrector · 🍅 Pomodoro timer and 🤖 AI Study Buddy: buttons at the bottom right.</p></div>
  <div class="card"><h2>📋 On your test</h2><ol style="margin:0;padding-left:20px"><li>Asexual and sexual reproduction</li><li>Male and female reproductive systems: parts and functions</li><li>Menstrual cycle and fertilisation</li><li>Flower male and female parts, and pollination</li><li>DNA and genes</li></ol><p class="small mute" style="margin:8px 0 0">Plus the Criterion A skills: describe, apply and analyse data. Pregnancy and seed dispersal are marked as bonus topics.</p></div>
  <div class="card"><h2>🗺️ Tonight’s study plan (about 2 hours)</h2>
  <ol style="margin:0;padding-left:20px">
@@ -1793,6 +1806,7 @@ function record(res,skip){
   else fb.insertAdjacentHTML("beforeend",`<div class="fb ${cls}"><div class="head">${head}</div>${q.ex?`<div class="why">${q.ex}</div>`:""}</div>`);
  }else{fb.innerHTML=`<div class="fb neutral"><b>Answer saved.</b>${halved?" (Hint used: half marks.)":""} Feedback comes at the end, like the real test.<div class="why">💡 <b>Learning tip:</b> ${tipFor(q,ses.tipN)}</div></div>`}
  if(test&&q.type==="written")fb.insertAdjacentHTML("beforeend",`<div class="fb neutral" style="margin-top:8px">💡 <b>Learning tip:</b> ${TYPE_TIPS.written}${halved?" <i>(Hint used: half marks.)</i>":""}</div>`);
+ if(ses.mode==="practice"){S.lastAsk={q,your:res.your,correct:res.correct};fb.insertAdjacentHTML("beforeend",'<button class="btn ghost" style="margin-top:8px;font-size:14px" onclick="askAboutLast()">🤖 Ask the AI Study Buddy about this</button>')}
  const acts=$("#acts");acts.innerHTML=`<button class="btn primary" id="nextBtn">${ses.i+1<ses.qs.length?"Next question →":"See results →"}</button>`;
  $("#nextBtn").onclick=()=>{ses.i++;renderQ()};$("#nextBtn").focus({preventScroll:true});
 }
@@ -1906,8 +1920,8 @@ const wait=ms=>new Promise(r=>setTimeout(r,ms));
 function aiReady(){
  if(window.claude&&typeof window.claude.use==="function"){
   if(!AIP)AIP=Promise.resolve().then(()=>window.claude.use("sample")).then(s=>{AI_ON=!!s;return s}).catch(()=>null);
-  return AIP}
- return Promise.resolve(null);
+  return AIP.then(s=>s||keySampler())}
+ return Promise.resolve(keySampler());
 }
 aiReady();setTimeout(aiReady,1500);
 const CMDS=["describe","explain","analyse","compare","justify","suggest","evaluate","outline","state","plan","predict"];
@@ -1967,7 +1981,7 @@ ${txt.slice(0,3000)}
 Reply with ONLY a JSON object, no other text, in exactly this shape:
 {"points":[{"awarded":true,"comment":"..."}],"mistakes":["..."],"level":0,"strength":"...","improve":"...","better":"..."}
 Rules: "points" has exactly ${n} items in the same order as the mark scheme; each comment is max 20 words and says what they wrote or what is missing, speaking to the student as "you". "mistakes" lists scientifically wrong statements from the answer, each corrected in max 25 words (empty array if none). "level" is an integer 0-8 for the MYP Year 3 Criterion A level this answer shows (1-2 recall basics, 3-4 state/define, 5-6 outline with correct terms, 7-8 describe in detail, fully explain or analyse thoroughly). "strength" is one specific thing done well (max 25 words). "improve" is the single most useful specific improvement (max 35 words). "better" is an improved version of the student's own answer that would earn full marks, keeping their good sentences, max 130 words, plain text.`;
- const out=await sample(prompt,{modelTier:"default"});
+ const out=await sample(prompt,{modelTier:"quick"});
  const s=(out&&out.text)||"";const j=JSON.parse(s.slice(s.indexOf("{"),s.lastIndexOf("}")+1));
  if(!j||!Array.isArray(j.points)||j.points.length!==n)throw{code:"bad_format"};
  return j;
@@ -2053,104 +2067,14 @@ function saveUltimate(){const ses=S.ses;if(!ses||ses.mode!=="ultimate")return;
  store.set("ult",{ids:ses.qs.map(q=>q.id),i:ses.i+1,res:ses.res.map(r=>({id:r.q.id,earned:r.earned,possible:r.possible,frac:r.frac,your:r.your,correct:r.correct,mark:r.mark||""}))})}
 
 /* =========================================================
-   RELAXING MUSIC (composed live with the Web Audio API)
+   SOUND HELPER (lesson sound effects + Pomodoro chime)
    ========================================================= */
-const SND={ctx:null,master:null,V:null,timer:null,cur:"off",step:0,next:0};
+const SND={ctx:null,master:null};
 const mf=m=>440*Math.pow(2,(m-69)/12);
 function sndInit(){
- if(!SND.ctx){const C=window.AudioContext||window.webkitAudioContext;if(!C)return null;SND.ctx=new C();SND.master=SND.ctx.createGain();SND.master.gain.value=(+$("#sndVol").value)*1.3;SND.master.connect(SND.ctx.destination)}
+ if(!SND.ctx){const C=window.AudioContext||window.webkitAudioContext;if(!C)return null;SND.ctx=new C();SND.master=SND.ctx.createGain();SND.master.gain.value=0.6;SND.master.connect(SND.ctx.destination)}
  if(SND.ctx.state==="suspended")SND.ctx.resume().catch(()=>{});return SND.ctx}
-function makeIR(sec){const ctx=SND.ctx,sr=ctx.sampleRate,len=Math.floor(sr*sec),b=ctx.createBuffer(2,len,sr);
- for(let ch=0;ch<2;ch++){const d=b.getChannelData(ch);for(let i=0;i<len;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/len,3.5)}return b}
-let WHITE=null;function white(){if(WHITE)return WHITE;const ctx=SND.ctx,len=ctx.sampleRate,b=ctx.createBuffer(1,len,ctx.sampleRate),d=b.getChannelData(0);for(let i=0;i<len;i++)d[i]=Math.random()*2-1;return WHITE=b}
-function newVoice(rev){const ctx=SND.ctx,bus=ctx.createGain();bus.gain.value=0.0001;bus.connect(SND.master);bus.gain.setTargetAtTime(1,ctx.currentTime,0.7);
- const dry=ctx.createBiquadFilter();dry.type="lowpass";dry.frequency.value=6000;dry.connect(bus);
- const conv=ctx.createConvolver();conv.buffer=makeIR(3.4);const wet=ctx.createGain();wet.gain.value=rev;conv.connect(wet);wet.connect(bus);
- return{bus,dry,send:conv}}
-function out(node,wet){const V=SND.V;node.connect(V.dry);if(wet){const g=SND.ctx.createGain();g.gain.value=wet;node.connect(g);g.connect(V.send)}}
-function env(g,t,vel,att,len){g.gain.setValueAtTime(0.0001,t);g.gain.exponentialRampToValueAtTime(vel,t+att);g.gain.exponentialRampToValueAtTime(0.0001,t+len)}
-// --- instruments ---
-function piano(m,t,vel,len,wet=0.5){const ctx=SND.ctx,f=mf(m),g=ctx.createGain();
- g.gain.setValueAtTime(0.0001,t);g.gain.exponentialRampToValueAtTime(vel,t+0.006);g.gain.exponentialRampToValueAtTime(vel*0.3,t+0.45);g.gain.exponentialRampToValueAtTime(0.0001,t+len);
- const lp=ctx.createBiquadFilter();lp.type="lowpass";lp.frequency.setValueAtTime(Math.min(9000,f*8),t);lp.frequency.exponentialRampToValueAtTime(Math.max(250,f*1.5),t+len);lp.connect(g);
- [[1,1],[2,0.38],[3,0.14],[4,0.07],[5,0.03]].forEach(([k,a])=>{const o=ctx.createOscillator();o.frequency.value=f*k*(1+0.0003*k*k);o.detune.value=(Math.random()-0.5)*3;const ga=ctx.createGain();ga.gain.value=a;o.connect(ga);ga.connect(lp);o.start(t);o.stop(t+len+0.05)});
- out(g,wet)}
-function rhodes(m,t,vel,len,wet=0.35){const ctx=SND.ctx,f=mf(m),g=ctx.createGain();
- g.gain.setValueAtTime(0.0001,t);g.gain.exponentialRampToValueAtTime(vel,t+0.012);g.gain.exponentialRampToValueAtTime(vel*0.4,t+0.9);g.gain.exponentialRampToValueAtTime(0.0001,t+len+0.4);
- const o=ctx.createOscillator();o.frequency.value=f;o.connect(g);
- const o2=ctx.createOscillator(),g2=ctx.createGain();o2.frequency.value=f*2;env(g2,t,vel*0.45,0.005,0.4);o2.connect(g2);
- const trem=ctx.createGain();trem.gain.value=0.85;const lfo=ctx.createOscillator(),lg=ctx.createGain();lfo.frequency.value=4.3;lg.gain.value=0.15;lfo.connect(lg);lg.connect(trem.gain);
- g.connect(trem);g2.connect(trem);[o,o2,lfo].forEach(x=>{x.start(t);x.stop(t+len+0.5)});out(trem,wet)}
-function bass(m,t,vel,len){const ctx=SND.ctx,o=ctx.createOscillator(),g=ctx.createGain(),lp=ctx.createBiquadFilter();o.type="triangle";o.frequency.value=mf(m);lp.type="lowpass";lp.frequency.value=380;
- g.gain.setValueAtTime(0.0001,t);g.gain.exponentialRampToValueAtTime(vel,t+0.02);g.gain.exponentialRampToValueAtTime(vel*0.5,t+len*0.6);g.gain.exponentialRampToValueAtTime(0.0001,t+len);
- o.connect(lp);lp.connect(g);o.start(t);o.stop(t+len+0.05);out(g,0.1)}
-function pad(m,t,len,vel){const ctx=SND.ctx,g=ctx.createGain(),lp=ctx.createBiquadFilter();lp.type="lowpass";lp.frequency.value=900;lp.Q.value=0.4;
- g.gain.setValueAtTime(0.0001,t);g.gain.linearRampToValueAtTime(vel,t+2.8);g.gain.setValueAtTime(vel,t+len-2.5);g.gain.linearRampToValueAtTime(0.0001,t+len+1.5);
- [-6,6].forEach(d=>{const o=ctx.createOscillator();o.type="triangle";o.frequency.value=mf(m);o.detune.value=d;o.connect(lp);o.start(t);o.stop(t+len+1.6)});
- const s=ctx.createOscillator();s.frequency.value=mf(m-12);const sg=ctx.createGain();sg.gain.value=0.5;s.connect(sg);sg.connect(lp);s.start(t);s.stop(t+len+1.6);
- lp.connect(g);out(g,0.8)}
-function bell(m,t,vel,wet=0.55){const ctx=SND.ctx,f=mf(m);[[1,1,2.4],[3,0.18,0.8],[4.2,0.08,0.5]].forEach(([k,a,d])=>{const o=ctx.createOscillator(),g=ctx.createGain();o.frequency.value=f*k;env(g,t,vel*a,0.003,d);o.connect(g);o.start(t);o.stop(t+d+0.05);out(g,wet)})}
-function kick(t,v){const ctx=SND.ctx,o=ctx.createOscillator(),g=ctx.createGain();o.frequency.setValueAtTime(115,t);o.frequency.exponentialRampToValueAtTime(42,t+0.13);env(g,t,v,0.004,0.32);o.connect(g);o.start(t);o.stop(t+0.35);out(g,0)}
-function snare(t,v){const ctx=SND.ctx,n=ctx.createBufferSource(),bp=ctx.createBiquadFilter(),g=ctx.createGain();n.buffer=white();bp.type="bandpass";bp.frequency.value=1700;bp.Q.value=0.8;env(g,t,v,0.003,0.18);n.connect(bp);bp.connect(g);n.start(t);n.stop(t+0.2);out(g,0.25);
- const o=ctx.createOscillator(),og=ctx.createGain();o.type="triangle";o.frequency.value=185;env(og,t,v*0.5,0.003,0.09);o.connect(og);o.start(t);o.stop(t+0.1);out(og,0.1)}
-function hat(t,v){const ctx=SND.ctx,n=ctx.createBufferSource(),hp=ctx.createBiquadFilter(),g=ctx.createGain();n.buffer=white();hp.type="highpass";hp.frequency.value=7500;env(g,t,v,0.002,0.045);n.connect(hp);hp.connect(g);n.start(t,Math.random()*0.5);n.stop(t+0.06);out(g,0.05)}
-// --- composing helpers ---
-const PENT=[0,2,4,7,9];
-function phrase(bars,prog,lo,hi,density){
- const scale=[];for(let m=lo;m<=hi;m++)if(PENT.includes(m%12))scale.push(m);
- let idx=Math.floor(scale.length/2);const res=[];
- for(let b=0;b<bars;b++){const ch=prog[b%prog.length],pcs=ch.n.map(x=>x%12),ev=[];
-  const snap=()=>{let m=scale[idx],best=m,bd=99;for(const c of scale)if(pcs.includes(c%12)&&Math.abs(c-m)<bd){bd=Math.abs(c-m);best=c}idx=scale.indexOf(best);return best};
-  if(b===bars-1){ev.push([0,snap()])}
-  else for(let s=0;s<8;s++){if(s===0||(Math.random()<density&&(s%2===0||Math.random()<0.45))){idx=Math.max(0,Math.min(scale.length-1,idx+[-2,-1,-1,0,1,1,2][Math.floor(Math.random()*7)]));ev.push([s,s%4===0?snap():scale[idx]])}}
-  ev.forEach((e,i)=>e.push((i+1<ev.length?ev[i+1][0]:8)-e[0]));res.push(ev)}
- return res}
-const C={Fmaj7:{b:41,n:[53,57,60,64]},Em7:{b:40,n:[52,55,59,62]},Dm7:{b:38,n:[50,53,57,60]},Cmaj7:{b:36,n:[48,52,55,59]},Am7:{b:45,n:[52,55,57,60]},G6:{b:43,n:[50,55,59,62]},
- Dm9:{b:38,n:[53,57,60,64]},G13:{b:43,n:[53,57,59,64]},Cmaj9:{b:36,n:[52,55,59,62]},Am9:{b:45,n:[55,59,60,64]},Fmaj9:{b:41,n:[55,57,60,64]}};
-const FORM=["A","A","B","A"];
-const TRACKS={
- piano:{bpm:64,rev:0.6,prog:{A:[C.Fmaj7,C.Em7,C.Dm7,C.Cmaj7],B:[C.Am7,C.Fmaj7,C.Cmaj7,C.G6]},mel:[72,86,0.45],
-  play(s,t,e,st){const bar=Math.floor(s/8),pos=s%8,sec=FORM[Math.floor(bar/4)%4],ch=this.prog[sec][bar%4];
-   if(pos===0){piano(ch.b,t,0.11,e*10,0.4);piano(ch.b+12,t,0.05,e*8,0.4)}
-   const arp=[0,1,2,3,2,1,2,3][pos];piano(ch.n[arp],t,0.045+Math.random()*0.012,e*4,0.5);
-   const ev=st.mel[sec][bar%4].find(x=>x[0]===pos);if(ev)piano(ev[1],t+0.01,0.085+Math.random()*0.02,Math.max(1.2,ev[2]*e+0.9),0.6)}},
- lofi:{bpm:76,swing:0.16,rev:0.35,prog:{A:[C.Dm9,C.G13,C.Cmaj9,C.Am9],B:[C.Fmaj9,C.Em7,C.Dm9,C.G13]},mel:[74,86,0.28],
-  play(s,t,e,st){const bar=Math.floor(s/8),pos=s%8,sec=FORM[Math.floor(bar/4)%4],ch=this.prog[sec][bar%4];
-   if(pos===0)ch.n.forEach((m,i)=>rhodes(m,t+i*0.012,0.05,e*7.5));
-   if(pos===7&&Math.random()<0.35)ch.n.slice(1).forEach(m=>rhodes(m,t,0.03,e*1.2));
-   if(pos===0)bass(ch.b,t,0.13,e*2.6);if(pos===5)bass(ch.b+(Math.random()<0.5?7:12),t,0.1,e*1.6);
-   if(pos===0||pos===5||(pos===3&&Math.random()<0.3))kick(t,0.17);if(pos===2||pos===6)snare(t,0.045);hat(t,pos%2?0.012:0.022);
-   const ev=st.mel[sec][bar%4].find(x=>x[0]===pos);if(ev&&bar%8>=2)rhodes(ev[1],t,0.05,Math.max(0.8,ev[2]*e),0.45)}},
- ambient:{bpm:60,rev:0.85,prog:{A:[C.Cmaj9,C.Am9,C.Fmaj9,C.G6],B:[C.Am7,C.Fmaj7,C.Cmaj7,C.G6]},mel:[76,93,0.22],
-  play(s,t,e,st){const bar=Math.floor(s/8),pos=s%8,ch=this.prog[FORM[Math.floor(bar/8)%4]][Math.floor(bar/2)%4];
-   if(pos===0&&bar%2===0)ch.n.forEach(m=>pad(m,t,e*16,0.03));if(pos===0&&bar%2===0)pad(ch.b+12,t,e*16,0.025);
-   const ev=st.mel.A[bar%4].find(x=>x[0]===pos);if(ev&&Math.random()<0.7)bell(ev[1],t,0.05,0.8)}},
- musicbox:{bpm:84,rev:0.5,prog:{A:[C.Cmaj7,C.Am7,C.Fmaj7,C.G6],B:[C.Fmaj7,C.Em7,C.Dm7,C.G6]},mel:[79,96,0.6],
-  play(s,t,e,st){const bar=Math.floor(s/8),pos=s%8,sec=FORM[Math.floor(bar/4)%4],ch=this.prog[sec][bar%4];
-   if(pos===0){piano(ch.b+12,t,0.07,e*8,0.5);piano(ch.n[1]+12,t+0.02,0.035,e*6,0.5);piano(ch.n[3]+12,t+0.04,0.03,e*6,0.5)}
-   if(pos===4)piano(ch.n[2]+12,t,0.03,e*4,0.5);
-   const ev=st.mel[sec][bar%4].find(x=>x[0]===pos);if(ev)bell(ev[1],t,0.07,0.5)}}
-};
-function sndStop(){clearInterval(SND.timer);SND.timer=null;
- if(SND.V){const V=SND.V;V.bus.gain.cancelScheduledValues(SND.ctx.currentTime);V.bus.gain.setTargetAtTime(0.0001,SND.ctx.currentTime,0.4);setTimeout(()=>{try{V.bus.disconnect()}catch(e){}},2500)}
- SND.V=null}
-function sndPlay(kind){
- if(kind!=="off"&&!sndInit())return;
- if(SND.ctx)sndStop();SND.cur=kind;updSndUI();if(kind==="off")return;
- const tr=TRACKS[kind],ctx=SND.ctx;SND.V=newVoice(tr.rev);
- const e=60/tr.bpm/2,st={};const compose=()=>{const [lo,hi,d]=tr.mel;st.mel={A:phrase(4,tr.prog.A,lo,hi,d),B:phrase(4,tr.prog.B,lo,hi,d)}};compose();
- SND.step=0;SND.next=ctx.currentTime+0.15;const my=SND.V;
- SND.timer=setInterval(()=>{if(SND.V!==my)return;while(SND.next<ctx.currentTime+1.2){const s=SND.step;
-   if(s>0&&s%128===0)compose(); // new melodies every 16 bars
-   tr.play(s,SND.next,e,st);SND.next+=tr.swing?e*(s%2===0?1+tr.swing:1-tr.swing):e;SND.step++}},120);
-}
-function updSndUI(){document.querySelectorAll("#sndp [data-s]").forEach(b=>b.classList.toggle("on",b.dataset.s===SND.cur));$("#sndBtn").classList.toggle("on",SND.cur!=="off")}
-$("#sndBtn").onclick=()=>{const p=$("#sndp");p.hidden=!p.hidden;$("#pomp").hidden=true};
-$("#pomBtn").onclick=()=>{const p=$("#pomp");p.hidden=!p.hidden;$("#sndp").hidden=true};
-// --- YouTube link (opens in a new tab; the hosted page can't embed other sites) ---
-function ytOk(u){try{const x=new URL(u);return x.protocol==="https:"&&/(^|\.)youtube\.com$|(^|\.)youtu\.be$/.test(x.hostname)}catch(e){return false}}
-(function(){const saved=store.get("yt",null);if(saved&&ytOk(saved))$("#ytLink").href=saved;$("#ytIn").value=$("#ytLink").href;
- $("#ytIn").onchange=e=>{const v=e.target.value.trim();if(ytOk(v)){$("#ytLink").href=v;store.set("yt",v);$("#ytMsg").textContent="✓ Saved"}else $("#ytMsg").textContent="Please paste a youtube.com or youtu.be link."}})();
+$("#pomBtn").onclick=()=>{const p=$("#pomp");p.hidden=!p.hidden;$("#aip").hidden=true};
 // --- Pomodoro ---
 const POM=Object.assign({mode:"focus",run:false,end:0,left:25*60,count:0,f:25,b:5,l:15,mute:false,resume:"off"},store.get("pom",{}));
 const pomDur=m=>(m==="focus"?POM.f:m==="short"?POM.b:POM.l)*60;
@@ -2163,13 +2087,13 @@ function pomUI(){
  $("#pStart").textContent=POM.run?"Pause":"Start";$("#pdots").textContent="🍅".repeat(POM.count%4)+"○".repeat(4-POM.count%4)+`  (${POM.count} done)`;
  $("#pomMini").textContent=POM.run||POM.left<pomDur(POM.mode)?" "+mmss(POM.left):"";
  document.title=(POM.run?`${POM.mode==="focus"?"🍅":"☕"} ${mmss(POM.left)} · `:"")+"Reproduction Mastery · Criterion A Prep";
- $("#pF").value=POM.f;$("#pB").value=POM.b;$("#pL").value=POM.l;$("#pMute").checked=POM.mute}
+ $("#pF").value=POM.f;$("#pB").value=POM.b;$("#pL").value=POM.l}
 function pomNext(auto){
  const was=POM.mode;
  if(was==="focus"){POM.count++;POM.mode=POM.count%4===0?"long":"short"}else POM.mode="focus";
  POM.left=pomDur(POM.mode);
- if(POM.mode!=="focus"){POM.run=true;POM.end=Date.now()+POM.left*1000;if(POM.mute&&SND.cur!=="off"){POM.resume=SND.cur;sndPlay("off")}}
- else{POM.run=false;if(POM.mute&&POM.resume&&POM.resume!=="off"&&SND.cur==="off")sndPlay(POM.resume);POM.resume="off"}
+ if(POM.mode!=="focus"){POM.run=true;POM.end=Date.now()+POM.left*1000}
+ else POM.run=false;
  pomSave();pomUI();
  if(auto){chime();notify(was==="focus"?(POM.mode==="long"?"🍅 4 focus sessions done, amazing! Take a <b>long break</b>: walk around, get a snack, rest your eyes.":"🍅 Focus session done! Take a <b>short break</b>: stand up, drink some water and look away from the screen."):"☕ Break’s over! Press <b>Start</b> on the 🍅 timer when you’re ready to focus again.")}
 }
@@ -2178,13 +2102,9 @@ $("#pStart").onclick=()=>{sndInit();if(POM.run){POM.run=false;POM.left=Math.max(
 $("#pReset").onclick=()=>{POM.run=false;POM.left=pomDur(POM.mode);pomSave();pomUI()};
 $("#pSkip").onclick=()=>pomNext(false);
 ["pF","pB","pL"].forEach(id=>$("#"+id).onchange=e=>{const v=Math.max(1,Math.min(120,Math.round(+e.target.value)||1));POM[{pF:"f",pB:"b",pL:"l"}[id]]=v;if(!POM.run)POM.left=pomDur(POM.mode);pomSave();pomUI()});
-$("#pMute").onchange=e=>{POM.mute=e.target.checked;pomSave()};
 if(POM.run&&POM.end<Date.now()){POM.run=false;POM.left=pomDur(POM.mode)}
 pomUI();setInterval(pomTick,1000);
-$("#sndp").addEventListener("click",e=>{const b=e.target.closest("[data-s]");if(b)sndPlay(b.dataset.s)});
-$("#sndVol").value=store.get("sndVol",0.5);
-$("#sndVol").oninput=e=>{const v=+e.target.value;store.set("sndVol",v);if(SND.master)SND.master.gain.setTargetAtTime(v*1.3,SND.ctx.currentTime,0.05)};
-document.addEventListener("click",e=>{const w=$("#snd");if(w&&!w.contains(e.target)&&!e.target.closest(".modal")){$("#sndp").hidden=true;$("#pomp").hidden=true}});
+document.addEventListener("click",e=>{const w=$("#snd");if(w&&!w.contains(e.target)&&!e.target.closest(".modal")){$("#pomp").hidden=true}});
 
 
 /* =========================================================
@@ -2407,6 +2327,91 @@ document.addEventListener("keydown",e=>{
  const tryIt=()=>{if(h(inp.value.trim())===KEY){store.set("unlocked",KEY);d.classList.add("unlock");setTimeout(()=>d.remove(),450)}else{inp.value="";d.querySelector("#pwMsg").textContent="Wrong password. Try again.";const b=d.querySelector(".lockbox");b.classList.remove("shake");void b.offsetWidth;b.classList.add("shake")}};
  d.querySelector("#pwGo").onclick=tryIt;inp.onkeydown=e=>{if(e.key==="Enter")tryIt()};
 })();
+
+
+/* =========================================================
+   AI STUDY BUDDY - runs on the cheapest Claude model (Claude Haiku 5.5)
+   - On the claude.ai link: uses Claude through the page's built-in "sample" capability.
+   - Anywhere else (e.g. GitHub Pages): each visitor pastes their OWN Anthropic API key,
+     which stays in their browser only (never put a key in this file - it's public).
+   ========================================================= */
+const AI_MODEL="claude-haiku-5-5";
+const SDK_URL="https://cdn.jsdelivr.net/npm/@anthropic-ai/sdk@1.4.0/+esm";
+let ANTH=null,ANTH_KEY="";
+async function keyClient(){
+ const key=store.get("anthKey","");if(!key)return null;
+ if(ANTH&&ANTH_KEY===key)return ANTH;
+ const mod=await import(SDK_URL);const Anthropic=mod.default||mod.Anthropic;
+ ANTH=new Anthropic({apiKey:key,dangerouslyAllowBrowser:true});ANTH_KEY=key;return ANTH;
+}
+// One streamed request to Claude Haiku 5.5 with the visitor's key. Returns the full text.
+async function keyComplete(messages,system,onText,effort){
+ const client=await keyClient();if(!client)throw{code:"no_ai"};
+ const stream=client.messages.stream({model:AI_MODEL,max_tokens:4000,...(system?{system}:{}),messages,output_config:{effort:effort||"low"}});
+ let text="";
+ for await(const event of stream){if(event.type==="content_block_delta"&&event.delta.type==="text_delta"){text+=event.delta.text;onText&&onText(text)}}
+ return text;
+}
+// A drop-in replacement for the page's "sample" function, used by the written-answer marker.
+function keySampler(){if(!store.get("anthKey",""))return null;
+ return async(input,opts)=>({text:await keyComplete(typeof input==="string"?[{role:"user",content:input}]:input,"",opts&&opts.onText,"medium")})}
+async function claudeSample(){if(!(window.claude&&typeof window.claude.use==="function"))return null;try{return await Promise.race([window.claude.use("sample"),wait(4000).then(()=>null)])}catch(e){return null}}
+async function aiBackend(){const s=AI_OFF?null:await claudeSample();if(s)return{kind:"claude",s};if(store.get("anthKey",""))return{kind:"key"};return null}
+
+const BUDDY_SYSTEM=`You are "Study Buddy", a friendly, encouraging science tutor helping an MYP Year 3 (Grade 8) student revise for a Criterion A test on reproduction.
+Test topics: (1) asexual vs sexual reproduction, (2) male and female reproductive systems - parts and functions, (3) menstrual cycle and fertilisation, (4) flower male and female parts and pollination, (5) DNA and genes. Criterion A also tests describing knowledge, applying it to unfamiliar situations, and analysing data.
+Stay consistent with the class review sheet:
+- Asexual: 1 parent, no fusion of gametes, clones (binary fission in bacteria, budding in yeast/hydra, runners). Sexual: 2 parents, gametes fuse, variation.
+- Male: testes make sperm + testosterone; scrotum keeps testes cooler; epididymis = sperm mature and are stored; sperm duct (vas deferens); prostate + seminal vesicles make seminal fluid (sperm + fluid = semen); urethra; penis.
+- Female: ovaries release eggs and make estrogen + progesterone; oviduct = site of fertilisation; uterus; endometrium = lining that thickens monthly; cervix = narrow neck of the uterus; vagina = birth canal.
+- Cycle: days 1-5 menstruation; 6-13 estrogen rises and the lining rebuilds; day 14 ovulation; 15-28 progesterone keeps the lining thick; no fertilisation -> hormones drop -> menstruation. Order F-Z-E-I: fertilisation (oviduct) -> zygote (1 cell) -> embryo -> implantation (uterus).
+- Flower: stamen (male) = anther (makes pollen grains, the male gametes) + filament; pistil/carpel (female) = stigma (sticky) + style + ovary (contains ovules). Pollination = pollen from anther to stigma (wind, insects, birds, water). Fertilisation = pollen tube down the style, male nucleus fuses with the egg nucleus in the ovule. Ovule -> seed; ovary -> fruit.
+- DNA: double helix; gene = section of DNA coding for a trait/protein; chromosome = DNA tightly coiled around proteins, in the nucleus. Smallest -> largest: base pairs -> gene -> DNA strand -> chromosome -> nucleus. Body cells 46 (diploid), gametes 23 (haploid). A pairs with T, C with G.
+How to help:
+- Use simple words and keep answers short (usually under 120 words) with bullet points, an example or a memory trick.
+- When asked to quiz, ask ONE question at a time, wait for the answer, then give feedback and the next question.
+- When checking a written answer, say what's right, what's missing, and how to reach level 7-8 (link feature -> what it does -> why it helps; quote numbers with units for data).
+- Stay on science and studying; kindly steer back if asked about other things. If you're not sure of something, say so instead of guessing.`;
+
+const AIH=[];let aiBusy=false;
+function aiEsc(s){return String(s).replace(/[&<>]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]))}
+function aiMd(s){return aiEsc(s).replace(/\*\*(.+?)\*\*/g,"<b>$1</b>").replace(/^\s*[-•]\s+/gm,"• ").replace(/\n/g,"<br>")}
+function aiMsg(role,html){const box=$("#aiMsgs");const d=document.createElement("div");d.className="aim "+role;d.innerHTML=html;box.appendChild(d);box.scrollTop=box.scrollHeight;return d}
+function aiChips(){const weak=TOPICS.filter(t=>t.grp==="test").map(t=>({t,m:topicMastery(t.id).pct})).sort((a,b)=>a.m-b.m)[0].t;
+ const chips=[["🎯 Quiz me on "+weak.name.split(/[,&]/)[0].trim().toLowerCase(),`Quiz me on ${weak.name}. Ask one question at a time.`],["🔤 Explain F-Z-E-I simply","Explain F-Z-E-I simply, with a memory trick."],["🌸 Memory trick for flower parts","Give me a memory trick for the parts of a flower and what each does."],["✍️ Check my written answer","I want you to check a written answer. I'll paste the question and my answer next."]];
+ $("#aiChips").innerHTML=chips.map(([l,m])=>`<button type="button" data-m="${aiEsc(m)}">${l}</button>`).join("")}
+async function aiRefresh(){const b=await aiBackend();const set=$("#aiSetup"),chat=$("#aiChat");
+ $("#aiMode").textContent=b?(b.kind==="claude"?"· via Claude":"· Haiku 5.5"):"";
+ set.hidden=!!b;chat.hidden=!b;$("#aiForget").hidden=!(b&&b.kind==="key");
+ if(b&&!$("#aiMsgs").children.length){aiMsg("bot","Hi! 👋 I’m your Study Buddy. Ask me anything about the test, or tap a button below to start.");aiChips()}}
+async function aiSend(text){
+ text=(text||"").trim();if(!text||aiBusy)return;aiBusy=true;$("#aiSend").disabled=true;
+ aiMsg("me",aiEsc(text).replace(/\n/g,"<br>"));AIH.push({role:"user",content:text});
+ const out=aiMsg("bot",'<span class="spin"></span>');
+ try{const b=await aiBackend();if(!b)throw{code:"no_ai"};
+  const hist=AIH.slice(-11); // odd count, so it always starts with a student messagelet reply="";
+  if(b.kind==="claude"){
+   // the page's sample function has no separate system field, so the instructions go first in the conversation
+   const msgs=[{role:"user",content:BUDDY_SYSTEM+"\n\n---\nThe student says:\n"+hist[0].content},...hist.slice(1)];
+   const r=await b.s(msgs,{modelTier:"quick",onText:({text})=>{out.innerHTML=aiMd(text)}});reply=r.text||"";
+  }else{reply=await keyComplete(hist,BUDDY_SYSTEM,t=>{out.innerHTML=aiMd(t);$("#aiMsgs").scrollTop=1e9})}
+  out.innerHTML=aiMd(reply||"(no answer)");AIH.push({role:"assistant",content:reply||"(no answer)"});
+ }catch(e){AIH.pop();const st=e&&e.status;
+  out.innerHTML="⚠️ "+(e&&e.code==="no_ai"?"The AI isn’t set up yet.":e&&e.code==="not_granted"?"AI use wasn’t allowed in this page.":st===401?"That API key didn’t work. Check it, or remove it and paste it again.":st===429?"Too many requests right now. Wait a few seconds and try again.":st===400&&/credit/i.test(e.message||"")?"Your API account is out of credit.":"Something went wrong. Try again in a moment.");
+  if(e&&e.code==="not_granted")AI_OFF=true;
+ }
+ aiBusy=false;$("#aiSend").disabled=false;$("#aiMsgs").scrollTop=1e9;
+}
+function aiOpen(prefill){$("#aip").hidden=false;$("#pomp").hidden=true;aiRefresh().then(()=>{if(prefill)aiSend(prefill);else{const i=$("#aiIn");i&&i.focus()}})}
+function askAboutLast(){const r=S.lastAsk;if(!r)return;aiOpen(`Explain this question to me simply, and why the correct answer is right.\nQuestion: ${strip(r.q.q)}\nMy answer: ${strip(String(r.your||"")).slice(0,600)}\nCorrect answer: ${strip(String(r.correct||"")).slice(0,600)}`)}
+$("#aiBtn").onclick=()=>{const p=$("#aip");if(p.hidden)aiOpen();else p.hidden=true};
+$("#aiClose").onclick=()=>{$("#aip").hidden=true};
+$("#aiForm").onsubmit=e=>{e.preventDefault();const i=$("#aiIn");const v=i.value;i.value="";aiSend(v)};
+$("#aiIn").onkeydown=e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();$("#aiForm").requestSubmit()}};
+$("#aiChips").onclick=e=>{const b=e.target.closest("button[data-m]");if(b)aiSend(b.dataset.m)};
+$("#aiKeySave").onclick=()=>{const v=$("#aiKey").value.trim();if(!/^sk-ant-/.test(v)){$("#aiKeyMsg").textContent="That doesn’t look like an Anthropic key (it should start with sk-ant-).";return}
+ store.set("anthKey",v);ANTH=null;$("#aiKey").value="";$("#aiKeyMsg").textContent="";aiRefresh()};
+$("#aiForget").onclick=()=>{store.set("anthKey","");ANTH=null;AIH.length=0;$("#aiMsgs").innerHTML="";aiRefresh()};
 
 go("home");
 </script>
